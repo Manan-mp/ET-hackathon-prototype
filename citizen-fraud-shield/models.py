@@ -11,6 +11,7 @@ class AnalyzeRequest(BaseModel):
     transcript: str = Field(
         ...,
         min_length=10,
+        max_length=12000,
         description="The call/message transcript or description to analyze.",
     )
 
@@ -57,8 +58,13 @@ class SessionSummary(BaseModel):
 
 
 class TranslateRequest(BaseModel):
-    text: str = Field(..., min_length=1)
-    language: str = Field(..., description="Target language, e.g. 'Hindi', 'Tamil'")
+    text: str = Field(..., min_length=1, max_length=4000)
+    language: str = Field(
+        ...,
+        min_length=2,
+        max_length=40,
+        description="Target language, e.g. 'Hindi', 'Tamil'",
+    )
 
 
 class TranslateResponse(BaseModel):

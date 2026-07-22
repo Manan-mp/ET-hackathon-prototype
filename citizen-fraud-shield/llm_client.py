@@ -5,10 +5,14 @@ from __future__ import annotations
 import json
 import os
 import re
+from pathlib import Path
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
 
 # ── Client Initialization ────────────────────────────────────────────────────
+
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
 _client: genai.Client | None = None
 
@@ -22,7 +26,7 @@ def _get_client() -> genai.Client:
         if not api_key:
             raise RuntimeError(
                 "GEMINI_API_KEY environment variable is not set. "
-                "Export it before running: export GEMINI_API_KEY=your_key"
+                "Add it to citizen-fraud-shield/.env or export it before running."
             )
         _client = genai.Client(api_key=api_key)
     return _client

@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
@@ -21,6 +22,9 @@ from models import (
     TranslateResponse,
 )
 from sample_transcripts import SAMPLES
+
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 
 # ── Lifespan ─────────────────────────────────────────────────────────────────
@@ -53,7 +57,8 @@ async def analyze(req: AnalyzeRequest):
     try:
         result = await llm_client.analyze_transcript(req.transcript)
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Analysis failed: {e}")
+        raise HTTPException(status_code=502, detail="Analysis service is temporarily unavailable.")
 
     session_id = uuid.uuid4().hex[:12]
 
@@ -80,7 +85,7 @@ async def analyze(req: AnalyzeRequest):
 
 
 @app.get("/api/sessions", response_model=list[SessionSummary])
-async def get_sessions(limit: int = 20):
+async def get_sessions(limit: int = Query(default=20, ge=1, le=50)):
     """Return recent analyzed sessions for the dashboard."""
     return db.get_recent_sessions(limit=limit)
 
@@ -102,14 +107,15 @@ async def translate(req: TranslateRequest):
         result = await llm_client.translate_text(req.text, req.language)
         return TranslateResponse(**result)
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Translation failed: {e}")
+        raise HTTPException(status_code=502, detail="Translation service is temporarily unavailable.")
 
 
 # ── Serve Frontend ───────────────────────────────────────────────────────────
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/")
 async def root():
-    return FileResponse("static/index.html")
+    return FileResponse(STATIC_DIR / "index.html")
