@@ -7,7 +7,7 @@ AI-powered detector for digital arrest scam calls and messages. This project was
 Add the deployed application URL here before submission:
 
 ```text
-https://your-deployed-url.example
+[https://your-deployed-url.example](https://et-hackathon-prototype.onrender.com/)
 ```
 
 Judges can test the project by opening the live URL, pasting a suspicious call or message transcript, and clicking the analyze button.
